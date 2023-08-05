@@ -344,7 +344,7 @@ response_print2("\n this is blinknormal ");
 }
 void BlinkLedRecivedataTask(void const * argument){
 BlinkLed_Senddata(1);
-		osDelay(8000);
+		osDelay(7000);
 }
 /**
   * @brief  Period elapsed callback in non blocking mode
