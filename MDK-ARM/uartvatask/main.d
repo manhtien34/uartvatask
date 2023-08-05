@@ -43,4 +43,3 @@ uartvatask\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 uartvatask\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 uartvatask\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
 uartvatask\main.o: ../App/response_ci.h
-uartvatask\main.o: ../App/ngoai.h

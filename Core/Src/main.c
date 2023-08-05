@@ -19,8 +19,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+//#include "stm32f10x.h"                  // Device header
 #include "response_ci.h"
-#include "ngoai.h"
 
 
 /* Private includes ----------------------------------------------------------*/
@@ -45,9 +45,12 @@
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
+
 osThreadId defaultTaskHandle;
 osMessageQId myQueue01Handle;
 osThreadId AboveNormalHandle; 
+osThreadId BlinkLedNormalHandle;
+osThreadId BlinkLedRecivedataHandle; 
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -59,7 +62,8 @@ static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
 void StartDefaultTask(void const * argument);
 void AboveNormalTask(void const *pragmeter);
-
+void BlinkLedNormalTask(void const * argument);
+void BlinkLedRecivedataTask(void const * argument);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -129,13 +133,17 @@ int main(void)
   /* definition and creation of defaultTask */
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
-
-  /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
-  /* USER CODE END RTOS_THREADS */
-     	osThreadDef(Task1,AboveNormalTask,osPriorityAboveNormal,0,128);//MUON SU DUNG TASK THI PHAI KHAI BAO THE NEN MOI CO DOG NAY, CAC THONG 
+	 	osThreadDef(Task1,AboveNormalTask,osPriorityAboveNormal,0,128);//MUON SU DUNG TASK THI PHAI KHAI BAO THE NEN MOI CO DOG NAY, CAC THONG 
 	// SO TRUYEN VAO LAN LUOT LA:TEN,HAM CUA TASK DA KHAI BAO ,MUC UU TIEN,SO PHIEN BAN CUA TASK , KICH THUOC     
 	AboveNormalHandle=osThreadCreate(osThread(Task1),NULL);
+
+osThreadDef(Task3,BlinkLedNormalTask,osPriorityHigh,0,128);
+BlinkLedNormalHandle=osThreadCreate(osThread(Task3),NULL);
+  /* USER CODE BHREADS */
+	osThreadDef(Task4,BlinkLedRecivedataTask,osPriorityBelowNormal,0,128);
+BlinkLedNormalHandle=osThreadCreate(osThread(Task4),NULL);
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
   osKernelStart();
@@ -261,10 +269,22 @@ static void MX_USART3_UART_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13|GPIO_PIN_14, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : PC13 PC14 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_14;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 }
 
@@ -280,15 +300,15 @@ static void MX_GPIO_Init(void)
   */
 /* USER CODE END Header_StartDefaultTask */
 
-/**
-  * @brief  Period elapsed callback in non blocking mode
-  * @note   This function is called  when TIM4 interrupt took place, inside
-  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
-  * a global variable "uwTick" used as application time base.
-  * @param  htim : TIM handle
-  * @retval None
-  */
- void StartDefaultTask(void const * argument)
+void Blinkled_Normal(){
+HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
+response_print2("\n led13_on ");
+}
+void BlinkLed_Senddata(int a){
+//HAL_GPIO_WritePin(GPIOC,GPIO_PIN_14,a);
+response_print2("\n led14_on ");
+}
+void StartDefaultTask(void const * argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
@@ -317,6 +337,23 @@ while(1){
 	osDelay(1000);//trong rtos thi su dung ham nay de chay delay
 }
 }
+void BlinkLedNormalTask(void const * argument){
+response_print2("\n this is blinknormal ");
+	Blinkled_Normal();
+	osDelay(6000);
+}
+void BlinkLedRecivedataTask(void const * argument){
+BlinkLed_Senddata(1);
+		osDelay(8000);
+}
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM4 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */

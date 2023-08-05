@@ -574,16 +574,6 @@
               <FilePath>..\App\response_ci.h</FilePath>
             </File>
             <File>
-              <FileName>ngoai.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\ngoai.c</FilePath>
-            </File>
-            <File>
-              <FileName>ngoai.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\App\ngoai.h</FilePath>
-            </File>
-            <File>
               <FileName>uartc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\uartc.c</FilePath>
